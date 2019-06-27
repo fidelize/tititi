@@ -1,13 +1,13 @@
 # Tititi is a component
 
-## Running as local environment
+## Running in a local environment
 
-- Run
+- Run the script below to up the system
     ````
     chmod +x setup.sh && ./setup.sh
     ````
 
-- Run
+- Run (inside the PHP container)
     ````
     php src/examples/redis/RedisConsumerExample.php
     ````

@@ -25,12 +25,6 @@ RUN mkdir -p /var/www/html/
 #Set the new directory as our working directory
 WORKDIR /var/www/html/
 
-#Copy all the content to the working directory
-COPY . /var/www/html/
-
-#Install composer dependecies
-RUN composer install
-
 # Create user
 ENV USER=app USER_ID=1234 USER_GID=1234
 
