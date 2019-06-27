@@ -1,0 +1,36 @@
+version: "2"
+services:
+  nginx:
+    image: register.fidelize.com.br/desenvolvimento/nginx
+    container_name: nginx-tititi
+    restart: always
+    volumes:
+      - ../docker/nginx_tititi:/etc/nginx/conf.d
+      - ./:/var/www/html
+      -  /usr/bin/ssh:/usr/bin/ssh
+    volumes_from:
+      - php:rw
+    links:
+      - php:php
+    networks:
+      projetos_micro_servicos:
+        ipv4_address: 10.11.0.76
+
+  php:
+    image: register.fidelize.com.br/desenvolvimento/php:7.2
+    container_name: php-tititi
+    restart: always
+    environment:
+      - XDEBUG_CONFIG=remote_host=172.17.0.1
+      - PHP_IDE_CONFIG=serverName=Local
+    volumes:
+      - ./:/var/www/html/
+      -  /usr/bin/ssh:/usr/bin/ssh
+      - ./docker/logs/xdebug/:/tmp/xdebug_log
+    networks:
+      projetos_micro_servicos:
+        ipv4_address: 10.11.0.77
+
+networks:
+  projetos_micro_servicos:
+    external: true
