@@ -1,0 +1,21 @@
+version: "2"
+services:
+  php:
+    build:
+      context: .
+      dockerfile: DockerfileDev
+    container_name: php-tititi
+    restart: always
+    environment:
+      - XDEBUG_CONFIG=remote_host=172.17.0.1
+      - PHP_IDE_CONFIG=serverName=Local
+    volumes:
+      - ./:/var/www/html/
+      -  /usr/bin/ssh:/usr/bin/ssh
+    networks:
+      projetos_micro_servicos:
+        ipv4_address: 10.11.0.77
+
+networks:
+  projetos_micro_servicos:
+    external: true
