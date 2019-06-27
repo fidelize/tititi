@@ -7,7 +7,6 @@ use Predis\Client;
 use Superbalist\PubSub\Adapters\DevNullPubSubAdapter;
 use Superbalist\PubSub\Adapters\LocalPubSubAdapter;
 use Superbalist\PubSub\GoogleCloud\GoogleCloudPubSubAdapter;
-use Superbalist\PubSub\HTTP\HTTPPubSubAdapter;
 use Superbalist\PubSub\PubSubAdapterInterface;
 use Superbalist\PubSub\Redis\RedisPubSubAdapter;
 
@@ -32,8 +31,6 @@ class PubSubConnectionFactory
                 return $this->makeRedisAdapter($config);
             case 'gcloud':
                 return $this->makeGoogleCloudAdapter($config);
-            case 'http':
-                return $this->makeHTTPAdapter($config);
         }
 
         throw new InvalidArgumentException(sprintf('The driver [%s] is not supported.', $driver));
@@ -72,48 +69,12 @@ class PubSubConnectionFactory
      */
     protected function makeGoogleCloudAdapter(array $config)
     {
-        $clientConfig = [
-            'projectId' => $config['project_id'],
-            'keyFilePath' => $config['key_file'],
-        ];
-        if (isset($config['auth_cache'])) {
-            $clientConfig['authCache'] = $this->container->make($config['auth_cache']);
-        }
+        putenv('GOOGLE_APPLICATION_CREDENTIALS=' . __DIR__ . '/../data/baratona-d15119261d3d.json');
 
-        $client = $this->container->makeWith('pubsub.gcloud.pub_sub_client', ['config' => $clientConfig]);
+        $client = new \Google\Cloud\PubSub\PubSubClient([
+            'projectId' => 'baratona',
+        ]);
 
-        $clientIdentifier = array_get($config, 'client_identifier');
-        $autoCreateTopics = array_get($config, 'auto_create_topics', true);
-        $autoCreateSubscriptions = array_get($config, 'auto_create_subscriptions', true);
-        $backgroundBatching = array_get($config, 'background_batching', false);
-        $backgroundDaemon = array_get($config, 'background_daemon', false);
-
-        if ($backgroundDaemon) {
-            putenv('IS_BATCH_DAEMON_RUNNING=true');
-        }
-        return new GoogleCloudPubSubAdapter(
-            $client,
-            $clientIdentifier,
-            $autoCreateTopics,
-            $autoCreateSubscriptions,
-            $backgroundBatching
-        );
-    }
-
-    /**
-     * Factory a HTTPPubSubAdapter.
-     *
-     * @param array $config
-     *
-     * @return HTTPPubSubAdapter
-     */
-    protected function makeHTTPAdapter(array $config)
-    {
-        $client = $this->container->make('pubsub.http.client');
-        $adapter = $this->make(
-            $config['subscribe_connection_config']['driver'],
-            $config['subscribe_connection_config']
-        );
-        return new HTTPPubSubAdapter($client, $config['uri'], $adapter);
+        return new \Superbalist\PubSub\GoogleCloud\GoogleCloudPubSubAdapter($client);
     }
 }
